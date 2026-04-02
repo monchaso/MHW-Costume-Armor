@@ -9,7 +9,13 @@ It is a C++ implementaion of the original [MHW Transmog](https://www.nexusmods.c
 Available also at [Nexus Mods](https://www.nexusmods.com/monsterhunterworld/mods/672)
 
 ## Release!
-Checkout the compiled binaries on the latest [Release](https://github.com/alcros33/MHW-Costume-Armor/releases) !
+
+To create a new release:
+1. Update the version and changelog if necessary.
+2. Push a tag starting with `v` (e.g., `git tag v1.0.2 && git push origin v1.0.2`).
+3. The GitHub Action will automatically build the project and create a new release with the compiled binaries.
+
+Existing releases can be found in the [Releases section](https://github.com/alcros33/MHW-Costume-Armor/releases).
 
 ### GUI Preview
 ![](Preview/preview1.png)

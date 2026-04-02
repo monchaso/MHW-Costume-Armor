@@ -1,0 +1,64 @@
+name: Create Release
+
+on:
+  push:
+    tags:
+      - 'v*'
+
+jobs:
+  release:
+    name: Build & Release
+    runs-on: windows-2019 # Using 2019 for better compatibility with older Qt versions
+    permissions:
+      contents: write
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Install Qt
+        uses: jurplel/install-qt-action@v3
+        with:
+          version: '5.12.12'
+          arch: 'win64_msvc2017_64'
+
+      - name: Setup MSVC
+        uses: ilammy/msvc-dev-cmd@v1
+
+      - name: Configure CMake
+        run: |
+          mkdir build
+          cmake -S . -B build -DCMAKE_BUILD_TYPE=Release -G "Visual Studio 16 2019" -A x64
+
+      - name: Build
+        run: |
+          cmake --build build --config Release
+
+      - name: Prepare Package
+        shell: pwsh
+        run: |
+          # Create a clean directory for packaging
+          New-Item -ItemType Directory -Force -Path "package/MHW Costume Armor"
+          
+          # Copy everything from bin to the package dir
+          Copy-Item -Path "bin/*" -Destination "package/MHW Costume Armor" -Recurse
+          
+          # Cleanup as per scripts/ReleaseRar.bat
+          Remove-Item -Path "package/MHW Costume Armor/*.log" -ErrorAction SilentlyContinue
+          Remove-Item -Path "package/MHW Costume Armor/*.a" -ErrorAction SilentlyContinue
+          Remove-Item -Path "package/MHW Costume Armor/SavedSets.json" -ErrorAction SilentlyContinue
+          Remove-Item -Path "package/MHW Costume Armor/settings.ini" -ErrorAction SilentlyContinue
+          if (Test-Path "package/MHW Costume Armor/Backups") {
+              Remove-Item -Path "package/MHW Costume Armor/Backups" -Recurse -Force
+          }
+
+          # Zip it up
+          Compress-Archive -Path "package/MHW Costume Armor" -DestinationPath "MHW-Costume-Armor-${{ github.ref_name }}.zip"
+
+      - name: Create Release
+        uses: softprops/action-gh-release@v1
+        with:
+          files: "MHW-Costume-Armor-${{ github.ref_name }}.zip"
+          body_path: CHANGELOG.md
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
