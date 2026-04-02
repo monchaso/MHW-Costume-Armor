@@ -48,6 +48,8 @@ debug_bin/
 
 # Dunno
 *.qm
+.cache/
+CMakeSettings.json
 
 # Visual Studio
 .vs
